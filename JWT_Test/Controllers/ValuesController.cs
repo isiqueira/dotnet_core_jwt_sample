@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JWT_Test.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace JWT_Test.Controllers
 {
@@ -10,36 +13,72 @@ namespace JWT_Test.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        // GET api/values
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
-        {
-            return new string[] { "value1", "value2" };
+
+        public string get() {
+            return "OK!";
         }
 
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        [Consumes("application/x-www-form-urlencoded")]
+        public object login([FromForm]User user,
+                            [FromServices]SigningConfigurations signingConfigurations,
+                            [FromServices]TokenConfigurations tokenConfigurations)
         {
+
+
+            if (user.auth())
+            {
+                var identity = new ClaimsIdentity
+                (
+                    new GenericIdentity(user.username, "Login"),
+                    new[] { new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")), new Claim(JwtRegisteredClaimNames.UniqueName, user.username) }
+                );
+
+                var handler = new JwtSecurityTokenHandler();
+                var securityToken = handler.CreateToken(new SecurityTokenDescriptor
+                {
+                    Issuer = tokenConfigurations.issuer,
+                    Audience = tokenConfigurations.audience,
+                    SigningCredentials = signingConfigurations.signingCredentials,
+                    Subject = identity,
+                    NotBefore = DateTime.Now,
+                    Expires = DateTime.Now + TimeSpan.FromSeconds(tokenConfigurations.seconds)
+                });
+
+                var token = handler.WriteToken(securityToken);
+
+                return new
+                {
+                    authenticated = true,
+                    created = (DateTime.Now + TimeSpan.FromSeconds(tokenConfigurations.seconds)).ToString("yyyy-MM-dd HH:mm:ss"),
+                    expiration = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    accessToken = token,
+                    message = "OK"
+                };
+
+            } else
+            {
+                return new
+                {
+                    authenticated = false,
+                    created = "",
+                    expiration = "",
+                    accessToken = "",
+                    message = "Authentication Fail."
+                };
+
+            }
+
+
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpGet("{id}")]
+        [Authorize("Bearer")]
+        public string loggedEndpoint(string id, [FromHeader]string Authorization)
         {
-        }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+
+            return $"Logged!!!{id} - {Authorization}";
         }
     }
 }
