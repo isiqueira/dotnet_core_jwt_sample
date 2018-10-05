@@ -33,7 +33,8 @@ namespace JWT_Test
             {
                 audience = "JWT_TEST_AUDIENCE",
                 issuer = "JWT_ISSUER",
-                seconds = 60
+                //seconds = 60,
+                validFor = 60
             };
 
             services.AddSingleton(tokenConfigurations);

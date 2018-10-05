@@ -1,11 +1,7 @@
 ﻿using JWT_Test.Models;
+using JWT_Test.TokenHandlers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace JWT_Test.Controllers
 {
@@ -14,71 +10,45 @@ namespace JWT_Test.Controllers
     public class ValuesController : ControllerBase
     {
 
+
+        private readonly TokenHandler _tokenHandler;
+
+        public ValuesController(TokenHandler tokenHandler)
+        {
+            this._tokenHandler = tokenHandler;
+        }
+
         public string get() {
             return "OK!";
         }
 
         [HttpPost]
         [Consumes("application/x-www-form-urlencoded")]
-        public object login([FromForm]User user,
-                            [FromServices]SigningConfigurations signingConfigurations,
-                            [FromServices]TokenConfigurations tokenConfigurations)
+        public object login([FromForm]User user)
         {
-
-
-            if (user.auth())
+            return user.auth() ? (object)this._tokenHandler.generateNewToken() : new
             {
-                var identity = new ClaimsIdentity
-                (
-                    new GenericIdentity(user.username, "Login"),
-                    new[] { new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")), new Claim(JwtRegisteredClaimNames.UniqueName, user.username) }
-                );
-
-                var handler = new JwtSecurityTokenHandler();
-                var securityToken = handler.CreateToken(new SecurityTokenDescriptor
-                {
-                    Issuer = tokenConfigurations.issuer,
-                    Audience = tokenConfigurations.audience,
-                    SigningCredentials = signingConfigurations.signingCredentials,
-                    Subject = identity,
-                    NotBefore = DateTime.Now,
-                    Expires = DateTime.Now + TimeSpan.FromSeconds(tokenConfigurations.seconds)
-                });
-
-                var token = handler.WriteToken(securityToken);
-
-                return new
-                {
-                    authenticated = true,
-                    created = (DateTime.Now + TimeSpan.FromSeconds(tokenConfigurations.seconds)).ToString("yyyy-MM-dd HH:mm:ss"),
-                    expiration = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    accessToken = token,
-                    message = "OK"
-                };
-
-            } else
-            {
-                return new
-                {
-                    authenticated = false,
-                    created = "",
-                    expiration = "",
-                    accessToken = "",
-                    message = "Authentication Fail."
-                };
-
-            }
-
-
+                authenticated = false,
+                created = "",
+                expiration = "",
+                accessToken = "",
+                message = "Authentication Fail."
+            };
         }
 
         [HttpGet("{id}")]
         [Authorize("Bearer")]
-        public string loggedEndpoint(string id, [FromHeader]string Authorization)
+        public object loggedEndpoint(string id, [FromHeader]string Authorization)
         {
+            var tokenData = this._tokenHandler.decodeToken(Authorization.Split(' ')[1].ToString());
 
-
-            return $"Logged!!!{id} - {Authorization}";
+            return new
+            {
+                id = id,
+                authenticated = true,
+                tokenData = tokenData
+            };
         }
+
     }
 }

@@ -26,13 +26,13 @@ namespace JWT_Test.Models
         private void createDb()
         {
             this._client = new MongoClient("");
-            this._db = this._client.GetDatabase("");
+            this._db = this._client.GetDatabase("security");
         }
 
         public ObjectId _id { get; set; }
         public string username { get; set; }
         public string password { get; set; }
-
+        public string email { get; set; }
         public bool auth() {
 
             var user = this._db.GetCollection<User>("Users")
