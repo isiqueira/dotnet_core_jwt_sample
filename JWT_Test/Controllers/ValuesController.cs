@@ -10,7 +10,6 @@ namespace JWT_Test.Controllers
     public class ValuesController : ControllerBase
     {
 
-
         private readonly TokenHandler _tokenHandler;
 
         public ValuesController(TokenHandler tokenHandler)

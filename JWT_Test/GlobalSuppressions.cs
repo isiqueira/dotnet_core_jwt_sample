@@ -8,4 +8,7 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~M:JWT_Test.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CC0021:Use nameof", Justification = "<Pending>", Scope = "member", Target = "~M:JWT_Test.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>", Scope = "member", Target = "~P:JWT_Test.Startup.Configuration")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CC0091:Use static method", Justification = "<Pending>", Scope = "member", Target = "~M:JWT_Test.TokenHandlers.TokenHandler.decodeToken(System.String)~System.Object")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CC0091:Use static method", Justification = "<Pending>", Scope = "member", Target = "~M:JWT_Test.TokenHandlers.TokenHandler.getIdentity(System.String)~System.Security.Principal.GenericIdentity")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CC0091:Use static method", Justification = "<Pending>", Scope = "member", Target = "~M:JWT_Test.Controllers.ValuesController.get~System.String")]
 
